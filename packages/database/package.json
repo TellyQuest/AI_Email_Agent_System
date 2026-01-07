@@ -1,0 +1,38 @@
+{
+  "name": "@ai-email-agent/database",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx src/migrate.ts",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio",
+    "test": "vitest",
+    "test:integration": "vitest --config vitest.integration.config.ts"
+  },
+  "dependencies": {
+    "@ai-email-agent/config": "workspace:*",
+    "@ai-email-agent/utils": "workspace:*",
+    "dotenv": "^16.3.0",
+    "drizzle-orm": "^0.45.1",
+    "pg": "^8.11.3",
+    "postgres": "^3.4.3"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.10.9",
+    "drizzle-kit": "^0.31.8",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.0.0"
+  }
+}

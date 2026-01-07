@@ -1,0 +1,9 @@
+{
+  "buildCommand": "cd ../.. && pnpm install && pnpm --filter @ai-email-agent/dashboard build",
+  "outputDirectory": "dist",
+  "framework": "vite",
+  "installCommand": "echo 'Using root install'",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

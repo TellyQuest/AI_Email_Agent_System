@@ -1,0 +1,33 @@
+{
+  "name": "@ai-email-agent/integrations",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "test": "vitest --passWithNoTests"
+  },
+  "dependencies": {
+    "@ai-email-agent/config": "workspace:*",
+    "@ai-email-agent/utils": "workspace:*",
+    "@aws-sdk/client-s3": "^3.490.0",
+    "@azure/identity": "^4.0.1",
+    "@microsoft/microsoft-graph-client": "^3.0.7",
+    "groq-sdk": "^0.37.0",
+    "isomorphic-fetch": "^3.0.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.5",
+    "typescript": "^5.3.3",
+    "vitest": "^1.0.0"
+  }
+}

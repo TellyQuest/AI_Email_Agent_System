@@ -1,0 +1,161 @@
+version: "1.0"
+
+settings:
+  defaultRiskLevel: medium
+  requireApprovalForNewVendors: true
+  requireApprovalForNewClients: true
+
+rules:
+  # Amount-based rules
+  - name: critical_amount
+    description: "Very high value transactions (>$25,000)"
+    condition:
+      field: amount
+      operator: ">"
+      value: 25000
+    riskLevel: critical
+    requiresApproval: true
+
+  - name: high_amount
+    description: "High value transactions (>$5,000)"
+    condition:
+      field: amount
+      operator: ">"
+      value: 5000
+    riskLevel: high
+    requiresApproval: true
+
+  - name: medium_amount
+    description: "Medium value transactions (>$1,000)"
+    condition:
+      field: amount
+      operator: ">"
+      value: 1000
+    riskLevel: medium
+    requiresApproval: false
+
+  # Vendor-based rules
+  - name: new_vendor
+    description: "First transaction with this vendor"
+    condition:
+      field: vendor_transaction_count
+      operator: "=="
+      value: 0
+    riskLevel: high
+    requiresApproval: true
+
+  - name: vendor_amount_anomaly
+    description: "Amount >3x vendor average"
+    condition:
+      field: amount_vs_vendor_avg_ratio
+      operator: ">"
+      value: 3
+    riskLevel: high
+    requiresApproval: true
+
+  # Client-based rules
+  - name: unmatched_client
+    description: "Could not determine which client this belongs to"
+    condition:
+      field: client_match_confidence
+      operator: "<"
+      value: 0.7
+    riskLevel: high
+    requiresApproval: true
+
+  - name: new_client_first_action
+    description: "First automated action for this client"
+    condition:
+      field: client_action_count
+      operator: "=="
+      value: 0
+    riskLevel: high
+    requiresApproval: true
+
+  # Confidence-based rules
+  - name: low_extraction_confidence
+    description: "LLM was not confident in data extraction"
+    condition:
+      field: extraction_confidence
+      operator: "<"
+      value: 0.8
+    riskLevel: high
+    requiresApproval: true
+
+  - name: low_amount_confidence
+    description: "Amount extraction has low confidence"
+    condition:
+      field: amount_confidence
+      operator: "<"
+      value: 0.9
+    riskLevel: high
+    requiresApproval: true
+
+  # Action-type rules
+  - name: payment_execution
+    description: "Actually sending money - always requires approval"
+    condition:
+      field: action_type
+      operator: in
+      value:
+        - execute_payment
+        - schedule_payment
+    riskLevel: critical
+    requiresApproval: true
+
+  - name: invoice_to_customer
+    description: "Sending invoice to customer"
+    condition:
+      field: action_type
+      operator: "=="
+      value: send_invoice
+    riskLevel: high
+    requiresApproval: true
+
+  - name: bill_creation
+    description: "Creating a bill (reversible)"
+    condition:
+      field: action_type
+      operator: "=="
+      value: create_bill
+    riskLevel: low
+    requiresApproval: false
+
+  # Time-based rules
+  - name: duplicate_timeframe
+    description: "Similar transaction within 60 minutes"
+    condition:
+      field: minutes_since_similar_transaction
+      operator: "<"
+      value: 60
+    riskLevel: high
+    requiresApproval: true
+
+riskBehaviors:
+  critical:
+    requiresApproval: true
+    approvalTimeoutHours: 24
+    escalateAfterHours: 4
+    notifyChannels:
+      - email
+      - slack
+
+  high:
+    requiresApproval: true
+    approvalTimeoutHours: 48
+    escalateAfterHours: 24
+    notifyChannels:
+      - email
+      - slack
+
+  medium:
+    requiresApproval: false
+    includeInDailySummary: true
+    notifyChannels:
+      - email
+
+  low:
+    requiresApproval: false
+    includeInWeeklySummary: true
+
+clientOverrides: []

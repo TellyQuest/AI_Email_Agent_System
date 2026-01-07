@@ -1,0 +1,29 @@
+{
+  "name": "@ai-email-agent/worker",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "clean": "rm -rf dist",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@ai-email-agent/config": "workspace:*",
+    "@ai-email-agent/core": "workspace:*",
+    "@ai-email-agent/database": "workspace:*",
+    "@ai-email-agent/integrations": "workspace:*",
+    "@ai-email-agent/utils": "workspace:*",
+    "bullmq": "^5.1.6",
+    "ioredis": "^5.3.2",
+    "pg-boss": "^12.5.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.5",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.0.0"
+  }
+}

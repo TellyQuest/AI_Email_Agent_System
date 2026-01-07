@@ -1,0 +1,37 @@
+{
+  "name": "@ai-email-agent/server",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "clean": "rm -rf dist",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@ai-email-agent/config": "workspace:*",
+    "@ai-email-agent/core": "workspace:*",
+    "@ai-email-agent/database": "workspace:*",
+    "@ai-email-agent/integrations": "workspace:*",
+    "@ai-email-agent/utils": "workspace:*",
+    "@fastify/cors": "^9.0.1",
+    "@fastify/helmet": "^11.1.1",
+    "@fastify/rate-limit": "^9.1.0",
+    "@fastify/sensible": "^5.5.0",
+    "@fastify/swagger": "^8.14.0",
+    "@fastify/swagger-ui": "^2.1.0",
+    "bullmq": "^5.1.6",
+    "fastify": "^4.25.2",
+    "ioredis": "^5.3.2",
+    "pg-boss": "^12.5.4",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.5",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.0.0"
+  }
+}

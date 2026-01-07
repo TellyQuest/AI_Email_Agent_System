@@ -1,0 +1,43 @@
+version: '3.8'
+
+# Development override - mounts source code and uses tsx for hot reload
+services:
+  postgres:
+    ports:
+      - "5432:5432"
+
+  # Redis - OPTIONAL (commented out since pgBoss uses PostgreSQL)
+  # redis:
+  #   ports:
+  #     - "6379:6379"
+
+  minio:
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+
+  server:
+    build:
+      context: .
+      target: deps
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: pnpm --filter @ai-email-agent/server dev
+    environment:
+      NODE_ENV: development
+    ports:
+      - "8080:8080"
+
+  worker:
+    build:
+      context: .
+      target: deps
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: pnpm --filter @ai-email-agent/worker dev
+    environment:
+      NODE_ENV: development
+    deploy:
+      replicas: 1
