@@ -26,21 +26,28 @@ RUN pnpm build
 FROM base AS server
 ENV NODE_ENV=production
 
-COPY --from=build /app/node_modules ./node_modules
+# Copy workspace configuration
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+
+# Copy package.json files for all packages
+COPY packages/utils/package.json ./packages/utils/
+COPY packages/config/package.json ./packages/config/
+COPY packages/database/package.json ./packages/database/
+COPY packages/core/package.json ./packages/core/
+COPY packages/integrations/package.json ./packages/integrations/
+COPY apps/server/package.json ./apps/server/
+
+# Copy built dist folders
 COPY --from=build /app/packages/utils/dist ./packages/utils/dist
-COPY --from=build /app/packages/utils/package.json ./packages/utils/
 COPY --from=build /app/packages/config/dist ./packages/config/dist
-COPY --from=build /app/packages/config/package.json ./packages/config/
 COPY --from=build /app/packages/database/dist ./packages/database/dist
-COPY --from=build /app/packages/database/package.json ./packages/database/
 COPY --from=build /app/packages/core/dist ./packages/core/dist
-COPY --from=build /app/packages/core/package.json ./packages/core/
 COPY --from=build /app/packages/integrations/dist ./packages/integrations/dist
-COPY --from=build /app/packages/integrations/package.json ./packages/integrations/
 COPY --from=build /app/apps/server/dist ./apps/server/dist
-COPY --from=build /app/apps/server/package.json ./apps/server/
 COPY --from=build /app/config ./config
-COPY --from=build /app/package.json ./
+
+# Install production dependencies (this creates proper symlinks)
+RUN pnpm install --prod --frozen-lockfile
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001
@@ -53,21 +60,28 @@ CMD ["node", "apps/server/dist/index.js"]
 FROM base AS worker
 ENV NODE_ENV=production
 
-COPY --from=build /app/node_modules ./node_modules
+# Copy workspace configuration
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+
+# Copy package.json files for all packages
+COPY packages/utils/package.json ./packages/utils/
+COPY packages/config/package.json ./packages/config/
+COPY packages/database/package.json ./packages/database/
+COPY packages/core/package.json ./packages/core/
+COPY packages/integrations/package.json ./packages/integrations/
+COPY apps/worker/package.json ./apps/worker/
+
+# Copy built dist folders
 COPY --from=build /app/packages/utils/dist ./packages/utils/dist
-COPY --from=build /app/packages/utils/package.json ./packages/utils/
 COPY --from=build /app/packages/config/dist ./packages/config/dist
-COPY --from=build /app/packages/config/package.json ./packages/config/
 COPY --from=build /app/packages/database/dist ./packages/database/dist
-COPY --from=build /app/packages/database/package.json ./packages/database/
 COPY --from=build /app/packages/core/dist ./packages/core/dist
-COPY --from=build /app/packages/core/package.json ./packages/core/
 COPY --from=build /app/packages/integrations/dist ./packages/integrations/dist
-COPY --from=build /app/packages/integrations/package.json ./packages/integrations/
 COPY --from=build /app/apps/worker/dist ./apps/worker/dist
-COPY --from=build /app/apps/worker/package.json ./apps/worker/
 COPY --from=build /app/config ./config
-COPY --from=build /app/package.json ./
+
+# Install production dependencies (this creates proper symlinks)
+RUN pnpm install --prod --frozen-lockfile
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001
