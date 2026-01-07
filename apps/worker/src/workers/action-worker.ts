@@ -179,8 +179,79 @@ async function executeQuickBooksAction(
       }
 
       case 'record_payment': {
+        const vendorName = String(params['vendorName'] ?? '');
+        const amountStr = String(params['amount'] ?? '0');
+        const paymentDate = String(params['paymentDate'] ?? new Date().toISOString().split('T')[0]);
+        const billId = params['billId'] ? String(params['billId']) : null;
+        const invoiceNumber = params['invoiceNumber'] ? String(params['invoiceNumber']) : null;
+
+        // Find the bill to pay
+        let billToPay: { Id: string; Balance: number } | null = null;
+
+        if (billId) {
+          // Direct bill ID lookup
+          const billResult = await quickbooksClient.getBill(billId);
+          if (billResult.ok) {
+            billToPay = { Id: billResult.value.Id, Balance: billResult.value.Balance };
+          }
+        } else if (invoiceNumber) {
+          // Find bill by document number
+          const billResult = await quickbooksClient.findBillByDocNumber(invoiceNumber);
+          if (billResult.ok && billResult.value) {
+            billToPay = { Id: billResult.value.Id, Balance: billResult.value.Balance };
+          }
+        } else if (vendorName) {
+          // Find vendor's most recent unpaid bill
+          const vendorResult = await quickbooksClient.findVendorByName(vendorName);
+          if (!vendorResult.ok || !vendorResult.value) {
+            return {
+              result: { success: false, error: `Vendor not found: ${vendorName}` },
+            };
+          }
+          // Note: In production, you'd query for unpaid bills for this vendor
+          // For now, we require either billId or invoiceNumber
+          return {
+            result: { success: false, error: 'Either billId or invoiceNumber is required to record payment' },
+          };
+        }
+
+        if (!billToPay) {
+          return {
+            result: { success: false, error: 'Could not find bill to apply payment to' },
+          };
+        }
+
+        // Create the bill payment
+        const amount = parseFloat(amountStr);
+        const paymentResult = await quickbooksClient.createBillPayment({
+          TotalAmt: amount,
+          TxnDate: paymentDate,
+          Line: [
+            {
+              Amount: amount,
+              LinkedTxn: [
+                {
+                  TxnId: billToPay.Id,
+                  TxnType: 'Bill',
+                },
+              ],
+            },
+          ],
+        });
+
+        if (!paymentResult.ok) {
+          return {
+            result: { success: false, error: `Failed to record payment: ${paymentResult.error.message}` },
+          };
+        }
+
         return {
-          result: { success: false, error: 'record_payment not yet implemented' },
+          result: {
+            success: true,
+            externalId: paymentResult.value.Id,
+            data: { paymentId: paymentResult.value.Id, billId: billToPay.Id, amount },
+          },
+          externalId: paymentResult.value.Id,
         };
       }
 
